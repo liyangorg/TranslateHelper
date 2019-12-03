@@ -239,7 +239,7 @@ function activateReplaceFunction(config) {
                 } else if (line.endsWith('.')) {
                     line += '\n'
                 } else {
-
+                    line += ' '
                 }
                 buffer += line;
             })
@@ -296,7 +296,7 @@ function activateCopyTransFunction(config) {
                 } else if (line.endsWith('.')) {
                     line += '\n'
                 } else {
-
+                    line += ' '
                 }
                 buffer += line;
             })
