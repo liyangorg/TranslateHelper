@@ -42,13 +42,13 @@ function listenSound(selector) {
     }
 }
 
-function clickPerformance(ele,text){
+function clickPerformance(ele, text) {
     // 实现点击之后，显示提示字符
     var top = $(ele).offset().top;
     var left = $(ele).offset().left;
     var performanceEle = '<div class="performance" style="top:' + (top - 20) + 'px;left:' + left + 'px">' + text + '</div>';
     $('body').append(performanceEle);
-    $('div.performance').animate({'top': top - 60}, 'slow', function () {
+    $('div.performance').animate({ 'top': top - 60 }, 'slow', function () {
         $(this).remove();
     })
 }
@@ -74,7 +74,7 @@ function isYouDaoTranslatePage(href) {
     return href.search("fanyi.youdao.com") > -1;
 }
 
-function isBingTranslatePage(href){
+function isBingTranslatePage(href) {
     return href.search("cn.bing.com/translator") > -1;
 }
 
@@ -90,13 +90,13 @@ var mode = null;
 // 插入页面的按钮放在该框内（解决在谷歌翻译页面不方便排版的问题）
 var helperBtnGroupEle = null;
 
-// 除换行按钮
+// 格式化按钮
 var replaceLineEle = null;
 
 // 复制按钮
 var copyTransEle = null;
 
-// 插入“除换行”和“复制”按钮的地方
+// 插入“格式化”和“复制”按钮的地方
 var insertEle = null;
 
 // 翻译界面的文字输入框
@@ -125,7 +125,7 @@ function matchElement(href, config) {
             inputEdit = $("textarea#source");
             listenEleSelector = "div.src-tts";
             helperBtnGroupEle = '<div id="helper_btn_group" class="googleNew1"></div>';
-            replaceLineEle = "<div id='replace_line' class='googleNew1'>除换行</div>";
+            replaceLineEle = "<div id='replace_line' class='googleNew1'>格式化</div>";
             copyTransEle = "<div id='copy_trans' class='googleNew1' data-clipboard-action='copy'" +
                 " data-clipboard-target='.result-shield-container.tlid-copy-target'>复制</div>";
         }
@@ -134,7 +134,7 @@ function matchElement(href, config) {
             inputEdit = $("textarea#source");
             listenEleSelector = "div#gt-src-listen";
             helperBtnGroupEle = '<div id="helper_btn_group" class="google"></div>';
-            replaceLineEle = "<div id='replace_line' class='google'>除换行</div>";
+            replaceLineEle = "<div id='replace_line' class='google'>格式化</div>";
             copyTransEle = "<div id='copy_trans' class='google' data-clipboard-action='copy'" +
                 " data-clipboard-target='.result-shield-container.tlid-copy-target'>复制</div>";
         }
@@ -147,7 +147,7 @@ function matchElement(href, config) {
         inputEdit = $("textarea#baidu_translate_input");
         listenEleSelector = "div.input-operate a";
         helperBtnGroupEle = '<div id="helper_btn_group" class="baidu"></div>';
-        replaceLineEle = "<div id='replace_line' class='baidu'>除换行</div>";
+        replaceLineEle = "<div id='replace_line' class='baidu'>格式化</div>";
         copyTransEle = "<div id='copy_trans' class='baidu' data-clipboard-action='copy'" +
             " data-clipboard-target='.output-bd'>复制</div>";
     }
@@ -159,13 +159,13 @@ function matchElement(href, config) {
         inputEdit = $("textarea#inputOriginal");
         listenEleSelector = null;
         helperBtnGroupEle = '<div id="helper_btn_group" class="youdao"></div>';
-        replaceLineEle = "<div id='replace_line' class='youdao'>除换行</div>";
+        replaceLineEle = "<div id='replace_line' class='youdao'>格式化</div>";
         copyTransEle = "<div id='copy_trans' class='youdao' data-clipboard-action='copy'" +
             " data-clipboard-target='#transTarget'>复制</div>";
         // 有道翻译页面未找到发音按钮
         console.log("翻译助手：有道翻译页面未找到发音按钮");
     }
-    else if (isBingTranslatePage(href)){
+    else if (isBingTranslatePage(href)) {
         // 必应翻译
         currentPage = 'bing';
         // console.log("翻译助手：必应翻译页面");
@@ -173,19 +173,18 @@ function matchElement(href, config) {
         inputEdit = $("textarea#t_sv");
         listenEleSelector = "#t_srcplayc #t_srcplaycIcon";
         helperBtnGroupEle = '<div id="helper_btn_group" class="bing"></div>';
-        replaceLineEle = "<div id='replace_line' class='bing'>除换行</div>";
+        replaceLineEle = "<div id='replace_line' class='bing'>格式化</div>";
         copyTransEle = "<div id='copy_trans' class='bing' data-clipboard-action='copy'" +
             " data-clipboard-target='#t_tv'>复制</div>";
     }
-    if (!currentPage)
-    {
+    if (!currentPage) {
         // console.log("翻译助手：页面元素匹配失败。")
         return false;
     }
     return true;
 }
 
-// 在页面插入存放“除换行”“复制”按钮的框框
+// 在页面插入存放“格式化”“复制”按钮的框框
 function insertHelperBtnGroup(config) {
     mode = config.replaceFunction.pageSetting[currentPage].mode;
     if (mode == "append") {
@@ -198,13 +197,12 @@ function insertHelperBtnGroup(config) {
 }
 
 
-// “除换行”功能
+// “格式化”功能
 function activateReplaceFunction(config) {
     if (!config.replaceFunction.check) {
         return;
     }
-    if (!config.replaceFunction.pageSetting[currentPage].check)
-    {
+    if (!config.replaceFunction.pageSetting[currentPage].check) {
         return;
     }
     // console.log("activateReplaceFunction");
@@ -216,33 +214,51 @@ function activateReplaceFunction(config) {
     }
 
     $("#replace_line").click(function () {
-        // 点击“除换行”按钮，可自动去除待翻译文本中的大量换行符和空格（连续空格会变一个）。
+        // 点击“格式化”按钮，可自动去除待翻译文本中的大量换行符和空格（连续空格会变一个）。
         var replaced_text = inputEdit.val();
         replaced_text.trim()
-        if (/.*[\u4e00-\u9fa5]+.*$/.test(replaced_text)){
+        //         console.log(replaced_text)
+        if (/.*[\u4e00-\u9fa5]+.*$/.test(replaced_text)) {
             // 如果有中文，则将换行删除。
             // TODO: 此处可能误判，以后改进
-            replaced_text = replaced_text.replace(/\n/g,''); 
+            replaced_text = replaced_text.replace(/\n/g, '');
         }
-        else{
+        else {
             // 如果不含中文，则将换行替换成空格
-            replaced_text = replaced_text.replace(/\n/g,' '); 
+            // 空行输出 && 单行末尾不是 . ，都需要用空格替换换行
+
+            buffer = ''
+            replaced_text.trim().split('\n').forEach(function (line, i) {
+
+                if (line.length == 0) {
+                    line += '\n'
+                } else if (line.endsWith('.')) {
+
+                    line += '\n'
+                } else {
+
+                }
+                buffer += line;
+            })
+            replaced_text = buffer;
+
+            // replaced_text = replaced_text.replace(/\n/g,' '); 
         }
         // 将连续空格替换成单空格
-        replaced_text = replaced_text.replace(/  /g, ' ');
+        //replaced_text = replaced_text.replace(/  /g, ' ');
         // 在内容末尾添加换行，方便接着复制下一块内容。
         replaced_text += '\n';
         inputEdit.val(replaced_text);
-        clickPerformance(this,"已去除");
+        clickPerformance(this, "已去除");
     });
-    console.log("翻译助手：若未出现‘除换行’按钮，请右键点击本插件图标，在“选项”中尝试使用其他方式。");
+    console.log("翻译助手：若未出现‘格式化’按钮，请右键点击本插件图标，在“选项”中尝试使用其他方式。");
 }
 // “复制到剪贴板”功能
 function activateCopyTransFunction(config) {
-    if (!config.copyTransFunction.check){
+    if (!config.copyTransFunction.check) {
         return;
     }
-    if (!ClipboardJS.isSupported()){
+    if (!ClipboardJS.isSupported()) {
         console.log("当前浏览器不支持复制到剪贴板功能");
         return;
     }
@@ -253,23 +269,23 @@ function activateCopyTransFunction(config) {
         helperBtnGroupEle.html(helperBtnGroupEle.html() + copyTransEle)
     }
     var clipboard = new ClipboardJS('#copy_trans');
-    clipboard.on('success', function(e) {
-        clickPerformance('#copy_trans','已复制');
+    clipboard.on('success', function (e) {
+        clickPerformance('#copy_trans', '已复制');
         e.clearSelection();
     });
-    clipboard.on('error', function(e) {
-        clickPerformance('#copy_trans','出错');
+    clipboard.on('error', function (e) {
+        clickPerformance('#copy_trans', '出错');
     });
 }
 
-// “除换行”功能的快捷键
+// “格式化”功能的快捷键
 function activateReplaceKeyFunction(config) {
     if (!config.replaceKeyFunction.check) {
         return;
     }
     // console.log("activateReplaceKeyFunction");
     $(document).bind('keydown', config.replaceKeyFunction.keyValue, function () {
-        // 使用“除换行”的快捷键，可自动去除待翻译文本中的大量换行符和空格（两个变成一个）。
+        // 使用“格式化”的快捷键，可自动去除待翻译文本中的大量换行符和空格（两个变成一个）。
         var text = inputEdit.val();
         var after_replace_text = text.replace(/\n/g, " ").replace(/  /g, " ");
         inputEdit.val(after_replace_text);
@@ -286,7 +302,7 @@ function activateForceFunction(config) {
         if (!inputEdit.is(":focus")) {
             var text = inputEdit.val();
             inputEdit.focus();
-            setTimeout(function(){inputEdit.val(text)},100);
+            setTimeout(function () { inputEdit.val(text) }, 100);
         }
     });
 }
@@ -319,10 +335,8 @@ function activateClearFunction(config) {
 }
 
 var hasHelper = false;
-function addTranslateHelper()
-{
-    if (hasHelper)
-    {
+function addTranslateHelper() {
+    if (hasHelper) {
         // 防止重复添加
         return;
     }
@@ -331,8 +345,7 @@ function addTranslateHelper()
     chrome.storage.sync.get(defaultConfig, function (items) {
         var config = items;
         // 添加功能
-        if (matchElement(href, config))
-        {
+        if (matchElement(href, config)) {
             insertHelperBtnGroup(config);
             activateReplaceFunction(config);
             activateCopyTransFunction(config);
