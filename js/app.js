@@ -1,6 +1,8 @@
 var KEY_BACKSPACE = 8;
 var KEY_TAB = 9;
 var KEY_SHIFT = 16;
+var flag_format = 0;
+var flag_single = 0;
 
 //延时响应
 function DelayResponse(delayFun, parameter, timeDelay) {
@@ -127,7 +129,7 @@ function matchElement(href, config) {
             helperBtnGroupEle = '<div id="helper_btn_group" class="googleNew1"></div>';
             replaceLineEle = "<div id='replace_line' class='googleNew1'>格式化</div>";
             copyTransEle = "<div id='copy_trans' class='googleNew1' data-clipboard-action='copy'" +
-                " data-clipboard-target='.result-shield-container.tlid-copy-target'>复制</div>";
+                " data-clipboard-target='.result-shield-container.tlid-copy-target'>单句模式</div>";
         }
         else if (version == 'old') {
             insertEle = $("#gt-lang-right");
@@ -136,7 +138,7 @@ function matchElement(href, config) {
             helperBtnGroupEle = '<div id="helper_btn_group" class="google"></div>';
             replaceLineEle = "<div id='replace_line' class='google'>格式化</div>";
             copyTransEle = "<div id='copy_trans' class='google' data-clipboard-action='copy'" +
-                " data-clipboard-target='.result-shield-container.tlid-copy-target'>复制</div>";
+                " data-clipboard-target='.result-shield-container.tlid-copy-target'>单句模式</div>";
         }
     }
     else if (isBaiduTranslatePage(href)) {
@@ -149,7 +151,7 @@ function matchElement(href, config) {
         helperBtnGroupEle = '<div id="helper_btn_group" class="baidu"></div>';
         replaceLineEle = "<div id='replace_line' class='baidu'>格式化</div>";
         copyTransEle = "<div id='copy_trans' class='baidu' data-clipboard-action='copy'" +
-            " data-clipboard-target='.output-bd'>复制</div>";
+            " data-clipboard-target='.output-bd'>单句模式</div>";
     }
     else if (isYouDaoTranslatePage(href)) {
         // 有道翻译
@@ -161,7 +163,7 @@ function matchElement(href, config) {
         helperBtnGroupEle = '<div id="helper_btn_group" class="youdao"></div>';
         replaceLineEle = "<div id='replace_line' class='youdao'>格式化</div>";
         copyTransEle = "<div id='copy_trans' class='youdao' data-clipboard-action='copy'" +
-            " data-clipboard-target='#transTarget'>复制</div>";
+            " data-clipboard-target='#transTarget'>单句模式</div>";
         // 有道翻译页面未找到发音按钮
         console.log("翻译助手：有道翻译页面未找到发音按钮");
     }
@@ -175,7 +177,7 @@ function matchElement(href, config) {
         helperBtnGroupEle = '<div id="helper_btn_group" class="bing"></div>';
         replaceLineEle = "<div id='replace_line' class='bing'>格式化</div>";
         copyTransEle = "<div id='copy_trans' class='bing' data-clipboard-action='copy'" +
-            " data-clipboard-target='#t_tv'>复制</div>";
+            " data-clipboard-target='#t_tv'>单句模式</div>";
     }
     if (!currentPage) {
         // console.log("翻译助手：页面元素匹配失败。")
@@ -184,7 +186,7 @@ function matchElement(href, config) {
     return true;
 }
 
-// 在页面插入存放“格式化”“复制”按钮的框框
+// 在页面插入存放“格式化”“单句模式”按钮的框框
 function insertHelperBtnGroup(config) {
     mode = config.replaceFunction.pageSetting[currentPage].mode;
     if (mode == "append") {
@@ -214,6 +216,8 @@ function activateReplaceFunction(config) {
     }
 
     $("#replace_line").click(function () {
+        //if (flag_format)
+        //return ;
         // 点击“格式化”按钮，可自动去除待翻译文本中的大量换行符和空格（连续空格会变一个）。
         var replaced_text = inputEdit.val();
         replaced_text.trim()
@@ -233,7 +237,6 @@ function activateReplaceFunction(config) {
                 if (line.length == 0) {
                     line += '\n'
                 } else if (line.endsWith('.')) {
-
                     line += '\n'
                 } else {
 
@@ -249,7 +252,8 @@ function activateReplaceFunction(config) {
         // 在内容末尾添加换行，方便接着复制下一块内容。
         replaced_text += '\n';
         inputEdit.val(replaced_text);
-        clickPerformance(this, "已去除");
+        clickPerformance(this, "阅读模式");
+        //flag_format = 1;
     });
     console.log("翻译助手：若未出现‘格式化’按钮，请右键点击本插件图标，在“选项”中尝试使用其他方式。");
 }
@@ -268,6 +272,56 @@ function activateCopyTransFunction(config) {
     else if (mode == "html") {
         helperBtnGroupEle.html(helperBtnGroupEle.html() + copyTransEle)
     }
+    $("#copy_trans").click(function () {
+        //if (flag_single)
+        //  return ;
+        // 点击“格式化”按钮，可自动去除待翻译文本中的大量换行符和空格（连续空格会变一个）。
+        var replaced_text = inputEdit.val();
+        replaced_text.trim()
+        //         console.log(replaced_text)
+        if (/.*[\u4e00-\u9fa5]+.*$/.test(replaced_text)) {
+            // 如果有中文，则将换行删除。
+            // TODO: 此处可能误判，以后改进
+            replaced_text = replaced_text.replace(/\n/g, '');
+        }
+        else {
+            // 如果不含中文，则将换行替换成空格
+            // 空行输出 && 单行末尾不是 . ，都需要用空格替换换行
+
+            buffer = ''
+            replaced_text.trim().split('\n').forEach(function (line, i) {
+
+                if (line.length == 0) {
+                    line += '\n'
+                } else if (line.endsWith('.')) {
+                    line += '\n'
+                } else {
+
+                }
+                buffer += line;
+            })
+            replaced_text = buffer;
+
+            replaced_text = replaced_text.replace(/\./g, '.\n');
+            // replaced_text = replaced_text.replace(/\n/g,' '); 
+
+            buffer = ''
+            replaced_text.trim().split('\n').forEach(function (line, i) {
+                tmp = line.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+                tmp += '\n'
+                buffer += tmp
+            })
+            replaced_text = buffer;
+        }
+        // 将连续空格替换成单空格
+        //replaced_text = replaced_text.replace(/  /g, ' ');
+        // 在内容末尾添加换行，方便接着复制下一块内容。
+        replaced_text += '\n';
+        inputEdit.val(replaced_text);
+        clickPerformance(this, "单句模式");
+        // flag_single = 1;
+    });
+    /*
     var clipboard = new ClipboardJS('#copy_trans');
     clipboard.on('success', function (e) {
         clickPerformance('#copy_trans', '已复制');
@@ -276,6 +330,7 @@ function activateCopyTransFunction(config) {
     clipboard.on('error', function (e) {
         clickPerformance('#copy_trans', '出错');
     });
+    */
 }
 
 // “格式化”功能的快捷键
